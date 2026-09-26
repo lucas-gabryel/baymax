@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assistente de Triagem</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --theme-color: #ef4444;
+            --theme-color-soft: #fee2e2;
+        }
+        * { font-family: 'Manrope', system-ui, sans-serif; }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 26px;
+            width: 26px;
+            border-radius: 50%;
+            background: var(--theme-color);
+            cursor: pointer;
+            margin-top: -9px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15);
+            border: 3px solid white;
+            transition: transform 0.15s ease;
+        }
+        input[type=range]::-webkit-slider-thumb:active { transform: scale(1.1); }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: #e5e7eb;
+            border-radius: 9999px;
+        }
+        input[type=range]:focus-visible::-webkit-slider-thumb {
+            outline: 3px solid var(--theme-color);
+            outline-offset: 2px;
+        }
+
+        .hide-scroll::-webkit-scrollbar { display: none; }
+
+        .chip {
+            transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+        }
+        .chip[aria-pressed="true"] {
+            background-color: var(--theme-color);
+            border-color: var(--theme-color);
+            color: white;
+        }
+
+        button:focus-visible, [tabindex]:focus-visible {
+            outline: 3px solid var(--theme-color);
+            outline-offset: 2px;
+        }
+
+        .watermark-icon {
+            position: absolute;
+            font-size: 8rem;
+            opacity: 0.12;
+            right: -1rem;
+            top: -1.25rem;
+            transform: rotate(-12deg);
+            pointer-events: none;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * { transition: none !important; animation: none !important; }
+        }
+    </style>
+</head>
+<body class="bg-[#FAFAF8] flex justify-center h-screen items-center text-gray-800" onload="changeSpecialty('geral')">
+
+    <!-- Mockup do Celular -->
+    <div class="bg-white w-full max-w-md h-full sm:h-[850px] sm:rounded-[2.5rem] sm:shadow-2xl overflow-hidden relative flex flex-col border-[8px] border-gray-900">
+
+        <!-- Header Dinâmico -->
+        <header id="app-header" class="text-white p-6 rounded-b-[2rem] shadow-lg z-10 transition-colors duration-500 bg-gradient-to-br from-red-500 to-red-600 relative overflow-hidden">
+            <i id="header-watermark" class="fa-solid fa-user-doctor watermark-icon" aria-hidden="true"></i>
+
+            <div class="flex justify-between items-center mb-6 relative z-10">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-white/25 border border-white/40 flex items-center justify-center overflow-hidden">
+                        <i class="fa-solid fa-user text-white/90" aria-hidden="true"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold text-white/80">Olá, paciente</p>
+                        <h2 class="text-lg font-bold">Como podemos ajudar?</h2>
+                    </div>
+                </div>
+                <button class="relative w-10 h-10 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors" aria-label="Notificações">
+                    <i class="fa-regular fa-bell" aria-hidden="true"></i>
+                    <span class="absolute top-2 right-2 w-2 h-2 bg-red-300 border border-white rounded-full"></span>
+                </button>
+            </div>
+
+            <div class="flex items-center gap-4 bg-black/10 p-4 rounded-2xl backdrop-blur-sm relative z-10">
+                <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-2xl shadow-sm">
+                    <i id="header-icon" class="fa-solid fa-user-doctor" style="color: var(--theme-color)" aria-hidden="true"></i>
+                </div>
+                <div>
+                    <h1 id="header-title" class="text-xl font-bold tracking-tight">Clínica Geral</h1>
+                    <p class="text-sm font-medium text-white/90">Assistente de triagem</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- TELA: Triagem -->
+        <main id="screen-triage" class="flex-1 min-h-0 overflow-y-auto p-6 flex flex-col gap-6 hide-scroll pb-24">
+
+            <div class="bg-white p-5 rounded-3xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                <h2 id="question-text" class="font-bold text-lg mb-4 text-gray-700">Qual o seu nível de dor?</h2>
+
+                <div class="flex justify-between text-2xl mb-4 px-1" aria-hidden="true">
+                    <span>🙂</span>
+                    <span>😐</span>
+                    <span>😟</span>
+                    <span>😫</span>
+                    <span>😭</span>
+                </div>
+
+                <input type="range" min="0" max="10" value="5" id="pain-slider"
+                       oninput="updatePainLevel(this.value)"
+                       aria-label="Nível de dor, de 0 a 10">
+
+                <div class="text-center mt-6 flex flex-col items-center">
+                    <span class="text-sm text-gray-500 font-medium">Nível registrado</span>
+                    <span class="text-5xl font-black transition-colors duration-300" id="pain-display" style="color: var(--theme-color)" aria-live="polite">5</span>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-sm font-semibold text-gray-500 mb-3">Sintomas comuns</h3>
+                <div class="flex flex-wrap gap-2" id="symptoms-chips" role="group" aria-label="Sintomas comuns">
+                    <!-- Preenchido via JS -->
+                </div>
+            </div>
+
+            <div class="flex-1 flex flex-col">
+                <label for="symptoms" class="text-sm font-semibold text-gray-500 mb-2">Outros detalhes (opcional)</label>
+                <textarea id="symptoms" rows="3" class="w-full p-4 bg-gray-50 border-0 rounded-2xl focus:ring-2 outline-none resize-none shadow-inner" placeholder="Descreva algo que os sintomas acima não cobrem..."></textarea>
+            </div>
+
+            <button onclick="analyzeSymptoms()" id="btn-analyze" class="w-full text-white font-bold py-4 rounded-2xl shadow-lg hover:opacity-90 transition-all active:scale-95 text-lg">
+                Avaliar quadro
+            </button>
+        </main>
+
+        <!-- TELA: Recomendação -->
+        <main id="screen-recommendation" class="flex-1 min-h-0 overflow-y-auto p-6 flex flex-col gap-6 hide-scroll hidden pb-24">
+
+            <div class="text-center mt-6">
+                <div id="result-icon-bg" class="w-24 h-24 rounded-full flex items-center justify-center text-5xl mx-auto mb-6 shadow-lg">
+                    <i id="result-icon" class="fa-solid fa-stethoscope text-white" aria-hidden="true"></i>
+                </div>
+                <h2 id="result-title" class="font-black text-3xl mb-3 text-gray-800">Análise concluída</h2>
+                <p class="text-gray-600 text-lg leading-relaxed" id="analysis-text"></p>
+            </div>
+
+            <!-- Card: encaminhamento padrão (UBS) -->
+            <div id="card-normal" class="bg-white border border-gray-100 rounded-3xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] mt-4 border-l-[6px]">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="font-bold text-gray-800 text-lg">Unidade recomendada</h3>
+                    <span class="bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap">Aberto agora</span>
+                </div>
+                <h4 class="font-black text-xl mb-1">UBS Centro</h4>
+                <p class="text-sm text-gray-500 mb-4">Unidade de Saúde de referência <span class="text-gray-400">· distância estimada</span></p>
+
+                <div class="flex items-center justify-between bg-gray-50 p-3 rounded-xl">
+                    <div class="flex items-center gap-3 text-sm font-semibold text-gray-700">
+                        <i class="fa-solid fa-location-arrow text-gray-400" aria-hidden="true"></i>
+                        <span>850 metros</span>
+                    </div>
+                    <button id="btn-route" type="button" onclick="showRoute()" class="text-sm font-bold px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 transition-colors">
+                        Ver rota
+                    </button>
+                </div>
+
+                <div id="map-container" class="hidden mt-3 rounded-xl overflow-hidden border border-gray-200">
+                    <iframe id="map-iframe" title="Mapa com sua localização" width="100%" height="180" style="border:0; display:block;" loading="lazy"></iframe>
+                </div>
+                <p id="map-hint" class="hidden text-xs text-gray-400 mt-2">Localização aproximada — o pino é apenas para referência, use o Maps para a rota exata.</p>
+            </div>
+
+            <!-- Card: emergência clínica -->
+            <div id="card-emergency" class="hidden bg-red-50 border border-red-200 rounded-3xl p-5 mt-4">
+                <div class="flex items-center gap-2 mb-3 text-red-700">
+                    <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+                    <h3 class="font-bold text-lg">Procure atendimento imediato</h3>
+                </div>
+                <p class="text-sm text-red-800 mb-4 leading-relaxed">
+                    Pelo nível registrado, seu quadro pode exigir atendimento de urgência. Não espere: vá ao pronto-socorro mais próximo ou ligue para o SAMU.
+                </p>
+                <a href="tel:192" class="flex items-center justify-center gap-2 w-full bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-700 transition-colors">
+                    <i class="fa-solid fa-phone" aria-hidden="true"></i>
+                    Ligar para o SAMU (192)
+                </a>
+            </div>
+
+            <!-- Card: apoio em saúde mental -->
+            <div id="card-crisis" class="hidden bg-indigo-50 border border-indigo-200 rounded-3xl p-5 mt-4">
+                <div class="flex items-center gap-2 mb-3 text-indigo-700">
+                    <i class="fa-solid fa-heart" aria-hidden="true"></i>
+                    <h3 class="font-bold text-lg">Você não precisa passar por isso sozinho</h3>
+                </div>
+                <p class="text-sm text-indigo-800 mb-4 leading-relaxed">
+                    O nível que você registrou sugere um momento difícil agora. O CVV oferece apoio emocional sigiloso, 24h por dia, por telefone ou chat.
+                </p>
+                <a href="tel:188" class="flex items-center justify-center gap-2 w-full bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition-colors">
+                    <i class="fa-solid fa-phone" aria-hidden="true"></i>
+                    Ligar para o CVV (188)
+                </a>
+            </div>
+
+            <button onclick="resetApp()" id="btn-back" class="w-full bg-gray-100 text-gray-600 font-bold py-4 rounded-2xl hover:bg-gray-200 transition-all active:scale-95 text-lg mt-auto">
+                Nova triagem
+            </button>
+        </main>
+
+        <!-- Navegação Inferior -->
+        <nav class="absolute bottom-0 w-full bg-white border-t border-gray-100 px-6 py-4 flex justify-between items-center z-20 pb-8 sm:pb-4 rounded-b-[2rem]" aria-label="Especialidades">
+            <button onclick="changeSpecialty('geral')" class="flex flex-col items-center gap-1 opacity-100 hover:opacity-100 transition-opacity w-16" id="nav-geral" aria-current="page">
+                <i class="fa-solid fa-user-doctor text-xl text-red-500" aria-hidden="true"></i>
+                <span class="text-[11px] font-bold text-red-500">Geral</span>
+            </button>
+            <button onclick="changeSpecialty('ortopedia')" class="flex flex-col items-center gap-1 opacity-50 hover:opacity-100 transition-opacity w-16" id="nav-ortopedia">
+                <i class="fa-solid fa-bone text-xl text-orange-500" aria-hidden="true"></i>
+                <span class="text-[11px] font-bold text-orange-500">Ortopedia</span>
+            </button>
+            <button onclick="changeSpecialty('cardiologia')" class="flex flex-col items-center gap-1 opacity-50 hover:opacity-100 transition-opacity w-16" id="nav-cardiologia">
+                <i class="fa-solid fa-heart-pulse text-xl text-rose-700" aria-hidden="true"></i>
+                <span class="text-[11px] font-bold text-rose-700">Cardio</span>
+            </button>
+            <button onclick="changeSpecialty('psicologia')" class="flex flex-col items-center gap-1 opacity-50 hover:opacity-100 transition-opacity w-16" id="nav-psicologia">
+                <i class="fa-solid fa-brain text-xl text-indigo-500" aria-hidden="true"></i>
+                <span class="text-[11px] font-bold text-indigo-500">Mental</span>
+            </button>
+        </nav>
+    </div>
+
+    <script>
+        const specialties = {
+            geral: {
+                title: "Clínica Geral",
+                colorHex: "#ef4444",
+                colorSoft: "#fee2e2",
+                gradient: "from-red-500 to-red-600",
+                icon: "fa-user-doctor",
+                question: "Qual o seu nível de dor?",
+                chips: ["Febre", "Dor de cabeça", "Enjoo", "Dor de garganta"],
+                emergencyThreshold: 8,
+                mode: "emergency"
+            },
+            ortopedia: {
+                title: "Ortopedia",
+                colorHex: "#f97316",
+                colorSoft: "#ffedd5",
+                gradient: "from-orange-400 to-orange-600",
+                icon: "fa-bone",
+                question: "Qual o nível da dor articular?",
+                chips: ["Tornozelo", "Coluna", "Joelho", "Pancada recente"],
+                emergencyThreshold: 8,
+                mode: "emergency"
+            },
+            cardiologia: {
+                title: "Cardiologia",
+                colorHex: "#be123c",
+                colorSoft: "#ffe4e6",
+                gradient: "from-rose-600 to-rose-800",
+                icon: "fa-heart-pulse",
+                question: "Qual o nível de desconforto no peito?",
+                chips: ["Palpitação", "Falta de ar", "Pressão alta", "Tontura"],
+                emergencyThreshold: 6,
+                mode: "emergency"
+            },
+            psicologia: {
+                title: "Saúde Mental",
+                colorHex: "#6366f1",
+                colorSoft: "#e0e7ff",
+                gradient: "from-indigo-500 to-purple-600",
+                icon: "fa-brain",
+                question: "Qual o seu nível de ansiedade hoje?",
+                chips: ["Pânico", "Tristeza", "Insônia", "Estresse"],
+                emergencyThreshold: 7,
+                mode: "crisis"
+            }
+        };
+
+        let currentSpec = 'geral';
+        let selectedChips = new Set();
+
+        function changeSpecialty(specKey) {
+            currentSpec = specKey;
+            selectedChips = new Set();
+            const data = specialties[specKey];
+
+            document.documentElement.style.setProperty('--theme-color', data.colorHex);
+            document.documentElement.style.setProperty('--theme-color-soft', data.colorSoft);
+
+            const header = document.getElementById('app-header');
+            header.className = `text-white p-6 rounded-b-[2rem] shadow-lg z-10 transition-all duration-500 bg-gradient-to-br ${data.gradient} relative overflow-hidden`;
+
+            document.getElementById('header-watermark').className = `fa-solid ${data.icon} watermark-icon`;
+            document.getElementById('header-icon').className = `fa-solid ${data.icon}`;
+            document.getElementById('header-icon').style.color = data.colorHex;
+            document.getElementById('header-title').innerText = data.title;
+            document.getElementById('question-text').innerText = data.question;
+
+            const chipsContainer = document.getElementById('symptoms-chips');
+            chipsContainer.innerHTML = '';
+            data.chips.forEach(chip => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'chip px-3 py-1.5 bg-gray-100 text-gray-600 rounded-lg text-sm font-semibold cursor-pointer border border-gray-200';
+                btn.textContent = chip;
+                btn.setAttribute('aria-pressed', 'false');
+                btn.onclick = () => toggleChip(btn, chip);
+                chipsContainer.appendChild(btn);
+            });
+
+            document.getElementById('btn-analyze').style.backgroundColor = data.colorHex;
+            document.getElementById('result-icon-bg').style.backgroundColor = data.colorHex;
+            document.getElementById('result-icon').className = `fa-solid ${data.icon} text-white`;
+            document.getElementById('card-normal').style.borderLeftColor = data.colorHex;
+
+            ['geral', 'ortopedia', 'cardiologia', 'psicologia'].forEach(nav => {
+                const el = document.getElementById(`nav-${nav}`);
+                el.classList.remove('opacity-100');
+                el.classList.add('opacity-50');
+                el.removeAttribute('aria-current');
+            });
+            const activeNav = document.getElementById(`nav-${specKey}`);
+            activeNav.classList.remove('opacity-50');
+            activeNav.classList.add('opacity-100');
+            activeNav.setAttribute('aria-current', 'page');
+
+            resetApp();
+        }
+
+        function toggleChip(btn, chip) {
+            if (selectedChips.has(chip)) {
+                selectedChips.delete(chip);
+                btn.setAttribute('aria-pressed', 'false');
+            } else {
+                selectedChips.add(chip);
+                btn.setAttribute('aria-pressed', 'true');
+            }
+        }
+
+        function updatePainLevel(value) {
+            document.getElementById('pain-display').innerText = value;
+        }
+
+        function analyzeSymptoms() {
+            const painLevel = parseInt(document.getElementById('pain-slider').value, 10);
+            const data = specialties[currentSpec];
+            const notes = document.getElementById('symptoms').value.trim();
+            const symptomsList = [...selectedChips, notes].filter(Boolean).join(', ') || 'nenhum sintoma detalhado';
+
+            const isUrgent = painLevel >= data.emergencyThreshold;
+            const cardNormal = document.getElementById('card-normal');
+            const cardEmergency = document.getElementById('card-emergency');
+            const cardCrisis = document.getElementById('card-crisis');
+            const resultIconBg = document.getElementById('result-icon-bg');
+            const resultIcon = document.getElementById('result-icon');
+            const resultTitle = document.getElementById('result-title');
+
+            cardNormal.classList.add('hidden');
+            cardEmergency.classList.add('hidden');
+            cardCrisis.classList.add('hidden');
+
+            if (isUrgent && data.mode === 'crisis') {
+                cardCrisis.classList.remove('hidden');
+                resultIconBg.style.backgroundColor = '#6366f1';
+                resultIcon.className = 'fa-solid fa-heart text-white';
+                resultTitle.innerText = 'Vamos com calma';
+                document.getElementById('analysis-text').innerHTML =
+                    `Você registrou um nível <strong>${painLevel}</strong> de ansiedade hoje, com: <strong>${symptomsList}</strong>.`;
+            } else if (isUrgent) {
+                cardEmergency.classList.remove('hidden');
+                resultIconBg.style.backgroundColor = '#dc2626';
+                resultIcon.className = 'fa-solid fa-triangle-exclamation text-white';
+                resultTitle.innerText = 'Atenção necessária';
+                document.getElementById('analysis-text').innerHTML =
+                    `Nível <strong>${painLevel}</strong> registrado em <strong>${data.title}</strong>, com: <strong>${symptomsList}</strong>.`;
+            } else {
+                cardNormal.classList.remove('hidden');
+                resultIconBg.style.backgroundColor = data.colorHex;
+                resultIcon.className = `fa-solid ${data.icon} text-white`;
+                resultTitle.innerText = 'Análise concluída';
+                document.getElementById('analysis-text').innerHTML =
+                    `Com base no nível <strong>${painLevel}</strong> registrado para <strong>${data.title}</strong> e nos sintomas descritos (<strong>${symptomsList}</strong>), localizamos a unidade mais próxima para o seu caso.`;
+            }
+
+            document.getElementById('screen-triage').classList.add('hidden');
+            document.getElementById('screen-recommendation').classList.remove('hidden');
+        }
+
+        function showRoute() {
+            const fallbackUrl = 'https://www.google.com/maps/search/?api=1&query=UBS+posto+de+sa%C3%BAde';
+            const btn = document.getElementById('btn-route');
+
+            if (!('geolocation' in navigator)) {
+                window.open(fallbackUrl, '_blank', 'noopener');
+                return;
+            }
+
+            btn.textContent = 'Localizando...';
+            btn.disabled = true;
+
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    const { latitude: lat, longitude: lng } = pos.coords;
+                    const delta = 0.008;
+                    const bbox = `${lng - delta},${lat - delta},${lng + delta},${lat + delta}`;
+
+                    document.getElementById('map-iframe').src =
+                        `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat},${lng}`;
+                    document.getElementById('map-container').classList.remove('hidden');
+                    document.getElementById('map-hint').classList.remove('hidden');
+
+                    const directionsUrl = `https://www.google.com/maps/dir/?api=1&origin=${lat},${lng}&destination=UBS+posto+de+sa%C3%BAde&travelmode=walking`;
+                    btn.textContent = 'Abrir no Maps';
+                    btn.disabled = false;
+                    btn.onclick = () => window.open(directionsUrl, '_blank', 'noopener');
+                },
+                () => {
+                    btn.textContent = 'Ver rota';
+                    btn.disabled = false;
+                    window.open(fallbackUrl, '_blank', 'noopener');
+                },
+                { timeout: 8000 }
+            );
+        }
+
+        function resetApp() {
+            const btn = document.getElementById('btn-route');
+            btn.textContent = 'Ver rota';
+            btn.disabled = false;
+            btn.onclick = showRoute;
+            document.getElementById('map-container').classList.add('hidden');
+            document.getElementById('map-hint').classList.add('hidden');
+            document.getElementById('map-iframe').src = '';
+
+            document.getElementById('pain-slider').value = 5;
+            updatePainLevel(5);
+            document.getElementById('symptoms').value = '';
+            document.querySelectorAll('#symptoms-chips .chip').forEach(btn => btn.setAttribute('aria-pressed', 'false'));
+            selectedChips.clear();
+
+            document.getElementById('screen-recommendation').classList.add('hidden');
+            document.getElementById('screen-triage').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
