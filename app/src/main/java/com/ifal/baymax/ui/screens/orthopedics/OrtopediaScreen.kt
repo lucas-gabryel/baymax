@@ -1,6 +1,7 @@
 package com.ifal.baymax.ui.screens.orthopedics
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,21 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -31,31 +17,31 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlin.math.roundToInt
 
 @Composable
-fun OrtopediaScreen() {
+fun OrtopediaScreen(
+    uiState: OrtopediaUiState,
+    onPainLevelChange: (Int) -> Unit,
+    onToggleSymptom: (String) -> Unit,
+    onDetailsChange: (String) -> Unit,
+    onEvaluate: () -> Unit
+) {
     val symptoms = listOf(
         "Tornozelo",
         "Coluna",
         "Joelho",
         "Pancada recente"
     )
-    var painLevel by remember {
-        mutableIntStateOf(5)
-    }
-
-    var selectedSymptoms by remember {
-        mutableStateOf(setOf<String>())
-    }
-
-    var details by remember {
-        mutableStateOf("")
-    }
-
-    var showResult by remember {
-        mutableStateOf(false)
-    }
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -63,33 +49,25 @@ fun OrtopediaScreen() {
         OrtopediaHeader()
 
         PainLevelCard(
-            painLevel = painLevel,
-            onPainLevelChange = { newPainLevel ->
-                painLevel = newPainLevel
-            }
+            painLevel = uiState.painLevel,
+            onPainLevelChange = onPainLevelChange
         )
 
         symptoms.forEach { symptom ->
-            val isSelected = symptom in selectedSymptoms
+            val isSelected = symptom in uiState.selectedSymptoms
 
             SymptomChip(
                 text = symptom,
                 selected = isSelected,
                 onClick = {
-                    selectedSymptoms = if (isSelected) {
-                        selectedSymptoms - symptom
-                    } else {
-                        selectedSymptoms + symptom
-                    }
+                    onToggleSymptom(symptom)
                 }
             )
         }
 
         OutlinedTextField(
-            value = details,
-            onValueChange = { newDetails ->
-                details = newDetails
-            },
+            value = uiState.details,
+            onValueChange = onDetailsChange,
             label = {
                 Text("Outros detalhes (opcional)")
             },
@@ -103,9 +81,7 @@ fun OrtopediaScreen() {
         )
 
         Button(
-            onClick = {
-                showResult = true
-            },
+            onClick = onEvaluate,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp),
@@ -114,10 +90,6 @@ fun OrtopediaScreen() {
             )
         ) {
             Text("Avaliar quadro")
-        }
-
-        if (showResult) {
-            Text("Avaliação iniciada")
         }
     }
 }
