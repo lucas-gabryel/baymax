@@ -1,6 +1,8 @@
 package com.ifal.baymax.ui.screens.orthopedics
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -8,8 +10,10 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -19,7 +23,8 @@ fun OrtopediaResultScreen(
     painLevel: Int,
     selectedSymptoms: Set<String>,
     details: String,
-    onNewTriage: () -> Unit
+    onNewTriage: () -> Unit,
+    onViewRoute: () -> Unit
 ) {
     val isUrgent = painLevel >= 8
 
@@ -39,12 +44,12 @@ fun OrtopediaResultScreen(
         if (isUrgent) {
             UrgencyCard()
         } else {
-            NormalRecommendationCard()
+            NormalRecommendationCard(
+                painLevel = painLevel,
+                symptomsText = symptomsText,
+                onViewRoute = onViewRoute
+            )
         }
-
-        Text("Nível de dor registrado: $painLevel")
-
-        Text("Sintomas: $symptomsText")
 
         if (details.isNotBlank()) {
             Text("Outros detalhes: $details")
@@ -64,6 +69,9 @@ fun OrtopediaResultScreen(
 @Composable
 private fun UrgencyCard() {
     Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 16.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color(0xFFFFE4E6)
         )
@@ -72,31 +80,78 @@ private fun UrgencyCard() {
             modifier = Modifier.padding(16.dp)
         ) {
             Text(
-                text = "Atenção necessária",
+                text = "⚠\uFE0F Atenção necessária",
                 style = MaterialTheme.typography.titleLarge
             )
 
-            Text("O nível de dor informado requer atenção imediata.")
+            Text(
+                text = "O nível de dor informado requer atenção imediata."
+            )
         }
     }
 }
 
 @Composable
-private fun NormalRecommendationCard() {
-    Card(
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFFFF7ED)
+private fun NormalRecommendationCard(
+    painLevel: Int,
+    symptomsText: String,
+    onViewRoute: () -> Unit
+) {
+    Column {
+        Text(
+            text = "Análise concluída",
+            style = MaterialTheme.typography.titleLarge
         )
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text(
-                text = "Análise concluída",
-                style = MaterialTheme.typography.titleLarge
-            )
 
-            Text("Seu quadro foi registrado para orientação de atendimento.")
+        Text(
+            text = "Nível de dor informado: $painLevel"
+        )
+
+        Text(
+            text = "Sintomas selecionados: $symptomsText"
+        )
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = Color(0xFFFFF7ED)
+            )
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(
+                    text = "Unidade recomendada",
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                Text(
+                    text = "UBS Centro",
+                    style = MaterialTheme.typography.titleLarge
+                )
+
+                Text(
+                    text = "Unidade de Saúde de referência - distância estimada"
+                )
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("\uD83D\uDCCD 850 metros")
+
+                    OutlinedButton(
+                        onClick = onViewRoute
+                    ) {
+                        Text("Ver rota")
+                    }
+                }
+            }
         }
     }
 }
