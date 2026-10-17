@@ -18,6 +18,7 @@ import androidx.navigation.compose.rememberNavController
 import com.ifal.baymax.ui.screens.orthopedics.OrtopediaResultScreen
 import com.ifal.baymax.ui.screens.orthopedics.OrtopediaScreen
 import com.ifal.baymax.ui.screens.orthopedics.OrtopediaViewModel
+import com.ifal.baymax.ui.screens.cardiology.CardiologiaScreen
 
 data class BottomNavItem(
     val route: String,
@@ -73,7 +74,7 @@ fun AppNavigation() {
             }
 
             composable(Screen.Cardiologia.route) {
-                Text("Cardiologia")
+                CardiologiaScreen()
             }
 
             composable(Screen.Psicologia.route) {
