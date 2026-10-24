@@ -19,6 +19,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Slider
@@ -38,9 +39,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun CardiologiaScreen() {
+fun CardiologiaScreen(navController: androidx.navigation.NavController) {
     var nivelDeDor by remember { mutableStateOf(5f) }
     var outrosDetalhes by remember { mutableStateOf("") }
+    var sintomasSelecionados by remember { mutableStateOf(setOf<String>()) }
+
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val bancoDeDados = com.ifal.baymax.db.cardiology.CardiologiaDatabase.getInstance(context)
 
     Column(
         modifier = Modifier
@@ -168,12 +173,21 @@ fun CardiologiaScreen() {
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    listOf("Palpitação", "Falta de ar", "Pressão alta", "Tontura", "x").forEach { sintoma ->
+                    listOf("Palpitação", "Falta de ar", "Pressão alta", "Tontura").forEach { sintoma ->
                         FilterChip(
-                            selected = false,
-                            onClick = {},
+                            selected = sintomasSelecionados.contains(sintoma),
+                            onClick = {
+                                sintomasSelecionados = if (sintomasSelecionados.contains(sintoma)) {
+                                    sintomasSelecionados - sintoma
+                                } else {
+                                    sintomasSelecionados + sintoma
+                                }
+                            },
                             label = { Text(sintoma) },
-                            modifier = Modifier.height(32.dp)
+                            modifier = Modifier.height(32.dp),
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = Color(0xFFFFE5EC), //fundo rosa fraco
+                            )
                         )
                     }
                 }
@@ -205,7 +219,18 @@ fun CardiologiaScreen() {
             }
             //4
             Button(
-                onClick = {},
+                onClick = {
+                    val sintomasSelecionados = sintomasSelecionados.joinToString(", ")
+                    //novo registroi
+                    val novoRegistro = com.ifal.baymax.db.cardiology.CardiologiaRecord(
+                        nivelDeDor = nivelDeDor.toInt(),
+                        sintomas = sintomasSelecionados,
+                        outrosDetalhes = outrosDetalhes
+                    )
+                    //o dao salva no banco
+                    bancoDeDados.cardiologiaDao().salvarTriagem(novoRegistro)
+                    android.widget.Toast.makeText(context, "Triagem salva no banco!", android.widget.Toast.LENGTH_SHORT).show()
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
@@ -221,6 +246,15 @@ fun CardiologiaScreen() {
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
+            }
+            //5
+            Button(
+                onClick = {
+                    navController.navigate("cardio_resultado")
+                },
+                modifier = Modifier.padding(16.dp).fillMaxWidth()
+            ) {
+                Text("Ver Histórico de Triagens")
             }
         }
     }
