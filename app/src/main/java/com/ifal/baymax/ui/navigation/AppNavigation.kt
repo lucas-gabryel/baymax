@@ -17,7 +17,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.ifal.baymax.ui.screens.orthopedics.OrtopediaResultScreen
 import com.ifal.baymax.ui.screens.orthopedics.OrtopediaScreen
-import com.ifal.baymax.ui.screens.orthopedics.OrtopediaViewModel
+import com.ifal.baymax.db.orthopedics.OrtopediaViewModel
 import com.ifal.baymax.ui.screens.cardiology.CardiologiaScreen
 
 data class BottomNavItem(
