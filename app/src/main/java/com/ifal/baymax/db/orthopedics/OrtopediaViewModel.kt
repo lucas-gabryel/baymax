@@ -6,6 +6,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.ifal.baymax.api.orthopedics.OrtopediaApiService
+import com.ifal.baymax.api.orthopedics.OrtopediaSpecialist
 import com.ifal.baymax.ui.screens.orthopedics.OrtopediaUiState
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -15,10 +17,20 @@ import kotlinx.coroutines.launch
 class OrtopediaViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository: OrtopediaRepository
+    private val apiService = OrtopediaApiService.create()
 
     val triageHistory: StateFlow<List<OrtopediaTriage>>
 
     var uiState by mutableStateOf(OrtopediaUiState())
+        private set
+
+    var specialists by mutableStateOf<List<OrtopediaSpecialist>> (emptyList())
+        private set
+
+    var isLoadingApi by mutableStateOf(false)
+        private set
+
+    var apiError by mutableStateOf<String?>(null)
         private set
 
     init {
@@ -67,6 +79,20 @@ class OrtopediaViewModel(application: Application) : AndroidViewModel(applicatio
                     details = uiState.details
                 )
             )
+        }
+    }
+
+    fun fetchSpecialists() {
+        viewModelScope.launch {
+            isLoadingApi = true
+            apiError = null
+            try {
+                specialists = apiService.getSpecialists()
+            } catch (e: Exception) {
+                apiError = "Erro ao carregar especialistas: ${e.message}"
+            } finally {
+                isLoadingApi = false
+            }
         }
     }
 }

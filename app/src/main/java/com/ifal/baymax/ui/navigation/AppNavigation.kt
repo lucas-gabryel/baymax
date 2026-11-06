@@ -20,6 +20,7 @@ import com.ifal.baymax.ui.screens.orthopedics.OrtopediaResultScreen
 import com.ifal.baymax.ui.screens.orthopedics.OrtopediaScreen
 import com.ifal.baymax.db.orthopedics.OrtopediaViewModel
 import com.ifal.baymax.ui.screens.cardiology.CardiologiaScreen
+import com.ifal.baymax.ui.screens.orthopedics.OrtopediaApiScreen
 
 data class BottomNavItem(
     val route: String,
@@ -98,7 +99,18 @@ fun AppNavigation() {
                         navController.popBackStack()
                     },
                     onViewRoute = {
-                        // TODO API
+                        navController.navigate(Screen.OrtopediaEspecialistas.route)
+                    }
+                )
+            }
+            composable(Screen.OrtopediaEspecialistas.route) {
+                OrtopediaApiScreen(
+                    specialists = ortopediaViewModel.specialists,
+                    isLoading = ortopediaViewModel.isLoadingApi,
+                    errorMessage = ortopediaViewModel.apiError,
+                    onLoadSpecialists = ortopediaViewModel::fetchSpecialists,
+                    onBack = {
+                        navController.popBackStack()
                     }
                 )
             }
