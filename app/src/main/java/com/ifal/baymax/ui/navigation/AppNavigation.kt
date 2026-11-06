@@ -6,6 +6,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -85,16 +86,19 @@ fun AppNavigation() {
             }
 
             composable(Screen.OrtopediaResultado.route) {
+                val history by ortopediaViewModel.triageHistory.collectAsState()
+
                 OrtopediaResultScreen(
                     painLevel = ortopediaViewModel.uiState.painLevel,
                     selectedSymptoms = ortopediaViewModel.uiState.selectedSymptoms,
                     details = ortopediaViewModel.uiState.details,
+                    history = history,
                     onNewTriage = {
                         ortopediaViewModel.reset()
                         navController.popBackStack()
                     },
                     onViewRoute = {
-                        // Mock temporário.
+                        // TODO API
                     }
                 )
             }
