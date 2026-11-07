@@ -6,7 +6,7 @@ import androidx.room.RoomDatabase
 import androidx.room.Room
 
 @Database(
-    version = 1, entities = [CardiologiaRecord::class]
+    version = 2, entities = [CardiologiaRecord::class]
 )
 abstract class CardiologiaDatabase : RoomDatabase() {
 
@@ -18,7 +18,8 @@ abstract class CardiologiaDatabase : RoomDatabase() {
                 context,
                 CardiologiaDatabase::class.java,
                 "baymax_cardio.db"
-            ).allowMainThreadQueries().build()
+            ).fallbackToDestructiveMigration(dropAllTables = true)
+                .build()
         }
     }
 }

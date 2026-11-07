@@ -8,6 +8,5 @@ data class CardiologiaRecord(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0L,
     val nivelDeDor: Int,
-    val sintomas: String,
-    val outrosDetalhes: String
+    val sintoma: String
 )
