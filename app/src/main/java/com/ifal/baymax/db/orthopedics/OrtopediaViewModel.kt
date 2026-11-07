@@ -1,18 +1,20 @@
 package com.ifal.baymax.db.orthopedics
 
 import android.app.Application
+import android.location.Location
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.ifal.baymax.api.orthopedics.HospitalElement
 import com.ifal.baymax.api.orthopedics.OrtopediaApiService
-import com.ifal.baymax.api.orthopedics.OrtopediaSpecialist
 import com.ifal.baymax.ui.screens.orthopedics.OrtopediaUiState
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlin.collections.filter
 
 class OrtopediaViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -24,7 +26,13 @@ class OrtopediaViewModel(application: Application) : AndroidViewModel(applicatio
     var uiState by mutableStateOf(OrtopediaUiState())
         private set
 
-    var specialists by mutableStateOf<List<OrtopediaSpecialist>> (emptyList())
+    var userLat by mutableStateOf(-9.6658)
+        private set
+
+    var userLng by mutableStateOf(-35.7350)
+        private set
+
+    var hospitals by mutableStateOf<List<HospitalElement>>(emptyList())
         private set
 
     var isLoadingApi by mutableStateOf(false)
@@ -82,14 +90,29 @@ class OrtopediaViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
-    fun fetchSpecialists() {
+    fun fetchNearbyHospitals(lat: Double, lng: Double) {
+        userLat = lat
+        userLng = lng
         viewModelScope.launch {
             isLoadingApi = true
             apiError = null
             try {
-                specialists = apiService.getSpecialists()
+                val query = """[out:json];nwr["amenity"="hospital"](around:10000,$lat,$lng);out center;"""
+                val response = apiService.getNearbyHospitals(query)
+
+                hospitals = response.elements
+                    .filter { !it.tags?.name.isNullOrBlank() && it.latitude != null && it.longitude != null }
+                    .sortedBy { hospital ->
+                        val results = FloatArray(1)
+                        Location.distanceBetween(
+                            lat, lng,
+                            hospital.latitude!!, hospital.longitude!!,
+                            results
+                        )
+                        results[0]
+                    }
             } catch (e: Exception) {
-                apiError = "Erro ao carregar especialistas: ${e.message}"
+                apiError = "Erro ao buscar hospitais próximos: ${e.message}"
             } finally {
                 isLoadingApi = false
             }

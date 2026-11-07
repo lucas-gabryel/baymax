@@ -105,10 +105,12 @@ fun AppNavigation() {
             }
             composable(Screen.OrtopediaEspecialistas.route) {
                 OrtopediaApiScreen(
-                    specialists = ortopediaViewModel.specialists,
+                    userLat = ortopediaViewModel.userLat,
+                    userLng = ortopediaViewModel.userLng,
+                    hospitals = ortopediaViewModel.hospitals,
                     isLoading = ortopediaViewModel.isLoadingApi,
                     errorMessage = ortopediaViewModel.apiError,
-                    onLoadSpecialists = ortopediaViewModel::fetchSpecialists,
+                    onLoadHospitals = ortopediaViewModel::fetchNearbyHospitals,
                     onBack = {
                         navController.popBackStack()
                     }
