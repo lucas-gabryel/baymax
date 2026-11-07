@@ -1,0 +1,14 @@
+[
+  {
+    "nivel": "Alto",
+    "recomendacao": "URGENTE: Risco elevado. Vá imediatamente a um pronto-socorro ou ligue 192 (SAMU)."
+  },
+  {
+    "nivel": "Moderado",
+    "recomendacao": "Atenção: Procure uma UPA ou hospital para avaliação cardiológica hoje."
+  },
+  {
+    "nivel": "Leve",
+    "recomendacao": "Recomendação: Descanse, evite esforços e agende uma consulta com cardiologista."
+  }
+]
