@@ -46,7 +46,7 @@ fun OrtopediaResultScreen(
         Text("Resultado da triagem")
 
         if (isUrgent) {
-            UrgencyCard()
+            UrgencyCard(onViewRoute = onViewRoute)
         } else {
             NormalRecommendationCard(
                 painLevel = painLevel,
@@ -69,7 +69,7 @@ fun OrtopediaResultScreen(
         }
 
         Text(
-            text = "Histórico de Triagens (Room)",
+            text = "Histórico de Triagens",
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(top = 24.dp, bottom = 8.dp)
         )
@@ -93,7 +93,9 @@ fun OrtopediaResultScreen(
 }
 
 @Composable
-private fun UrgencyCard() {
+private fun UrgencyCard(
+    onViewRoute: () -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -109,10 +111,15 @@ private fun UrgencyCard() {
                 text = "⚠\uFE0F Atenção necessária",
                 style = MaterialTheme.typography.titleLarge
             )
-
             Text(
                 text = "O nível de dor informado requer atenção imediata."
             )
+            OutlinedButton(
+                onClick = onViewRoute,
+                modifier = Modifier.padding(top = 12.dp)
+            ) {
+                Text("Buscar hospital próximo")
+            }
         }
     }
 }
@@ -149,19 +156,9 @@ private fun NormalRecommendationCard(
                 modifier = Modifier.padding(16.dp)
             ) {
                 Text(
-                    text = "Unidade recomendada",
+                    text = "Unidades recomendadas",
                     style = MaterialTheme.typography.titleMedium
                 )
-
-                Text(
-                    text = "UBS Centro",
-                    style = MaterialTheme.typography.titleLarge
-                )
-
-                Text(
-                    text = "Unidade de Saúde de referência - distância estimada"
-                )
-
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -169,12 +166,10 @@ private fun NormalRecommendationCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("\uD83D\uDCCD 850 metros")
-
                     OutlinedButton(
                         onClick = onViewRoute
                     ) {
-                        Text("Ver rota")
+                        Text("Buscar hospital próximo")
                     }
                 }
             }
