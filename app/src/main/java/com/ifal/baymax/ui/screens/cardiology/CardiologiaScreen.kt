@@ -20,8 +20,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
@@ -37,16 +35,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ifal.baymax.ui.navigation.Screen
+import kotlinx.coroutines.launch
 
 @Composable
 fun CardiologiaScreen(navController: androidx.navigation.NavController) {
     var nivelDeDor by remember { mutableStateOf(5f) }
-    var outrosDetalhes by remember { mutableStateOf("") }
-    var sintomasSelecionados by remember { mutableStateOf(setOf<String>()) }
-
+    var sintomaSelecionado by remember { mutableStateOf<String?>(null) }
     val context = androidx.compose.ui.platform.LocalContext.current
     val bancoDeDados = com.ifal.baymax.db.cardiology.CardiologiaDatabase.getInstance(context)
-
+    val escopo = androidx.compose.runtime.rememberCoroutineScope()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -163,7 +161,7 @@ fun CardiologiaScreen(navController: androidx.navigation.NavController) {
                 modifier = Modifier.padding(16.dp)
             ) {
                 Text(
-                    text = "Sintomas comuns",
+                    text = "O que você está sentindo?",
                     color = Color.Black,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
@@ -175,87 +173,52 @@ fun CardiologiaScreen(navController: androidx.navigation.NavController) {
                 ) {
                     listOf("Palpitação", "Falta de ar", "Pressão alta", "Tontura").forEach { sintoma ->
                         FilterChip(
-                            selected = sintomasSelecionados.contains(sintoma),
+                            selected = sintomaSelecionado == sintoma,
                             onClick = {
-                                sintomasSelecionados = if (sintomasSelecionados.contains(sintoma)) {
-                                    sintomasSelecionados - sintoma
-                                } else {
-                                    sintomasSelecionados + sintoma
-                                }
+                                sintomaSelecionado = if (sintomaSelecionado == sintoma) null else sintoma
                             },
                             label = { Text(sintoma) },
                             modifier = Modifier.height(32.dp),
                             colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = Color(0xFFFFE5EC), //fundo rosa fraco
+                                selectedContainerColor = Color(0xFFFFE5EC),
+                                selectedLabelColor = Color(0xFF9C1141)
                             )
                         )
                     }
                 }
             }
-            //3
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
-                Text(
-                    text = "Outros detalhes (opcional)",
-                    color = Color.Black,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
+        }
+        //3
+        Button(
+            onClick = {
+                val novoRegistro = com.ifal.baymax.db.cardiology.CardiologiaRecord(
+                    nivelDeDor = nivelDeDor.toInt(),
+                    sintoma = sintomaSelecionado ?: "Nenhum"
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = outrosDetalhes, //o que aparece
-                    onValueChange = { texto -> outrosDetalhes = texto }, //atualiza o valor a cada letra digitada
-                    placeholder = { Text("Descreva algo que os sintomas acima não cobrem...") },
-                    modifier = Modifier.fillMaxWidth(),
-                    minLines = 3,
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color(0xFF9C1141), //cor da borda quando clica
-                        cursorColor = Color(0xFF9C1141), //cor do ponteiro de texto
-                        unfocusedBorderColor = Color.LightGray //cor da borda quando não está clicado
-                    )
-                )
-            }
-            //4
-            Button(
-                onClick = {
-                    val sintomasSelecionados = sintomasSelecionados.joinToString(", ")
-                    //novo registroi
-                    val novoRegistro = com.ifal.baymax.db.cardiology.CardiologiaRecord(
-                        nivelDeDor = nivelDeDor.toInt(),
-                        sintomas = sintomasSelecionados,
-                        outrosDetalhes = outrosDetalhes
-                    )
-                    //o dao salva no banco
+                escopo.launch {
                     bancoDeDados.cardiologiaDao().salvarTriagem(novoRegistro)
-                    android.widget.Toast.makeText(context, "Triagem salva no banco!", android.widget.Toast.LENGTH_SHORT).show()
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-                    .height(56.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF9C1141)
-                ),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Text(
-                    text = "Avaliar quadro",
-                    color = Color.White,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-            //5
-            Button(
-                onClick = {
-                    navController.navigate("cardio_resultado")
-                },
-                modifier = Modifier.padding(16.dp).fillMaxWidth()
-            ) {
-                Text("Ver Histórico de Triagens")
-            }
+
+                    TriagemManager.nivelDeDor = nivelDeDor.toInt()
+                    TriagemManager.sintoma = sintomaSelecionado ?: "Nenhum"
+
+                    navController.navigate(Screen.CardiologiaResultado.route)
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .height(56.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF9C1141)
+            ),
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            Text(
+                text = "Avaliar quadro",
+                color = Color.White,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }

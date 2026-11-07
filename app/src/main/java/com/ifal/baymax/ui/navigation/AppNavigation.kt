@@ -79,7 +79,11 @@ fun AppNavigation() {
                 CardiologiaScreen(navController = navController)
             }
             composable(Screen.CardiologiaResultado.route) {
-                com.ifal.baymax.ui.screens.cardiology.CardiologiaResultScreen()
+                com.ifal.baymax.ui.screens.cardiology.CardiologiaResultScreen(
+                    navController = navController,
+                    nivelDeDor = com.ifal.baymax.ui.screens.cardiology.TriagemManager.nivelDeDor,
+                    sintoma = com.ifal.baymax.ui.screens.cardiology.TriagemManager.sintoma
+                )
             }
 
             composable(Screen.Psicologia.route) {

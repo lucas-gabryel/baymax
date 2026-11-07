@@ -8,8 +8,8 @@ import androidx.room.Query
 interface CardiologiaDao {
 
     @Insert
-    fun salvarTriagem(record: CardiologiaRecord)
+    suspend fun salvarTriagem(record: CardiologiaRecord)
 
     @Query("SELECT * FROM CardiologiaRecord ORDER BY id DESC")
-    fun buscarTodasAsTriagens(): List<CardiologiaRecord>
+    suspend fun buscarTodasAsTriagens(): List<CardiologiaRecord>
 }
