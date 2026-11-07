@@ -1,14 +1,19 @@
 [
-  {
-    "nivel": "Alto",
-    "recomendacao": "URGENTE: Risco elevado. Vá imediatamente a um pronto-socorro ou ligue 192 (SAMU)."
-  },
-  {
-    "nivel": "Moderado",
-    "recomendacao": "Atenção: Procure uma UPA ou hospital para avaliação cardiológica hoje."
-  },
-  {
-    "nivel": "Leve",
-    "recomendacao": "Recomendação: Descanse, evite esforços e agende uma consulta com cardiologista."
-  }
+  {"nivel": "Alto", "sintoma": "Palpitação", "recomendacao": "URGENTE: Palpitação intensa com dor alta. Risco de arritmia. Vá ao pronto-socorro imediatamente."},
+  {"nivel": "Alto", "sintoma": "Falta de ar", "recomendacao": "URGENTE: Falta de ar e dor alta no peito. Risco de infarto. Ligue 192 (SAMU) agora."},
+  {"nivel": "Alto", "sintoma": "Pressão alta", "recomendacao": "URGENTE: Crise hipertensiva com dor alta. Risco de AVC. Procure atendimento imediato."},
+  {"nivel": "Alto", "sintoma": "Tontura", "recomendacao": "URGENTE: Tontura e dor alta. Risco de desmaio. Vá à UPA mais próxima."},
+  {"nivel": "Alto", "sintoma": "Nenhum", "recomendacao": "URGENTE: Nível de dor elevado. Procure um pronto-socorro para avaliação cardiológica."},
+  
+  {"nivel": "Moderado", "sintoma": "Palpitação", "recomendacao": "Atenção: Palpitações frequentes. Agende consulta com cardiologista hoje e evite esforços."},
+  {"nivel": "Moderado", "sintoma": "Falta de ar", "recomendacao": "Atenção: Falta de ar aos esforços. Procure uma UPA para avaliação cardiológica hoje."},
+  {"nivel": "Moderado", "sintoma": "Pressão alta", "recomendacao": "Atenção: Pressão alta associada a dor. Meça a pressão e procure uma UPA se continuar alta."},
+  {"nivel": "Moderado", "sintoma": "Tontura", "recomendacao": "Atenção: Tontura e dor moderada. Pode ser pressão baixa. Sente-se e procure um médico."},
+  {"nivel": "Moderado", "sintoma": "Nenhum", "recomendacao": "Atenção: Dor moderada. Monitore os sintomas e procure um médico se piorar."},
+  
+  {"nivel": "Leve", "sintoma": "Palpitação", "recomendacao": "Recomendação: Palpitações leves. Reduza cafeína e estresse. Agende consulta de rotina."},
+  {"nivel": "Leve", "sintoma": "Falta de ar", "recomendacao": "Recomendação: Falta de ar leve. Pode ser ansiedade ou falta de condicionamento. Monitore."},
+  {"nivel": "Leve", "sintoma": "Pressão alta", "recomendacao": "Recomendação: Pressão levemente alta. Faça repouso e meça novamente em 1 hora."},
+  {"nivel": "Leve", "sintoma": "Tontura", "recomendacao": "Recomendação: Tontura leve. Hidrate-se e evite levantar rápido. Se persistir, consulte."},
+  {"nivel": "Leve", "sintoma": "Nenhum", "recomendacao": "Recomendação: Descanse, evite esforços e agende uma consulta de rotina com cardiologista."}
 ]
