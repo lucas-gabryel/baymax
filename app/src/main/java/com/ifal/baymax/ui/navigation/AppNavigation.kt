@@ -6,6 +6,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -19,6 +20,7 @@ import com.ifal.baymax.ui.screens.orthopedics.OrtopediaResultScreen
 import com.ifal.baymax.ui.screens.orthopedics.OrtopediaScreen
 import com.ifal.baymax.db.orthopedics.OrtopediaViewModel
 import com.ifal.baymax.ui.screens.cardiology.CardiologiaScreen
+import com.ifal.baymax.ui.screens.orthopedics.OrtopediaApiScreen
 
 data class BottomNavItem(
     val route: String,
@@ -85,16 +87,32 @@ fun AppNavigation() {
             }
 
             composable(Screen.OrtopediaResultado.route) {
+                val history by ortopediaViewModel.triageHistory.collectAsState()
+
                 OrtopediaResultScreen(
                     painLevel = ortopediaViewModel.uiState.painLevel,
                     selectedSymptoms = ortopediaViewModel.uiState.selectedSymptoms,
                     details = ortopediaViewModel.uiState.details,
+                    history = history,
                     onNewTriage = {
                         ortopediaViewModel.reset()
                         navController.popBackStack()
                     },
                     onViewRoute = {
-                        // Mock temporário.
+                        navController.navigate(Screen.OrtopediaEspecialistas.route)
+                    }
+                )
+            }
+            composable(Screen.OrtopediaEspecialistas.route) {
+                OrtopediaApiScreen(
+                    userLat = ortopediaViewModel.userLat,
+                    userLng = ortopediaViewModel.userLng,
+                    hospitals = ortopediaViewModel.hospitals,
+                    isLoading = ortopediaViewModel.isLoadingApi,
+                    errorMessage = ortopediaViewModel.apiError,
+                    onLoadHospitals = ortopediaViewModel::fetchNearbyHospitals,
+                    onBack = {
+                        navController.popBackStack()
                     }
                 )
             }
