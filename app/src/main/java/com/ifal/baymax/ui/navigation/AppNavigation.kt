@@ -12,14 +12,19 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.ifal.baymax.ui.screens.orthopedics.OrtopediaResultScreen
 import com.ifal.baymax.ui.screens.orthopedics.OrtopediaScreen
 import com.ifal.baymax.db.orthopedics.OrtopediaViewModel
 import com.ifal.baymax.ui.screens.cardiology.CardiologiaScreen
+import com.ifal.baymax.ui.screens.geral.GeralHistoricoScreen
+import com.ifal.baymax.ui.screens.geral.GeralResultadoScreen
+import com.ifal.baymax.ui.screens.geral.GeralScreen
 import com.ifal.baymax.ui.screens.orthopedics.OrtopediaApiScreen
 
 data class BottomNavItem(
@@ -55,11 +60,26 @@ fun AppNavigation() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Screen.Ortopedia.route,
+            startDestination = Screen.Geral.route,
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Geral.route) {
-                Text("Geral")
+                GeralScreen(navController = navController)
+            }
+
+            composable(
+                Screen.GeralResultado.route,
+                arguments = listOf(navArgument("nivelDor") { type = NavType.IntType })
+            ) { backStackEntry ->
+                GeralResultadoScreen(
+                    nivelDor = backStackEntry.arguments?.getInt("nivelDor") ?: 0,
+                    onNovaTriagem = { navController.popBackStack() },
+                    onVerHistorico = { navController.navigate(Screen.GeralHistorico.route) }
+                )
+            }
+
+            composable(Screen.GeralHistorico.route) {
+                GeralHistoricoScreen()
             }
 
             composable(Screen.Ortopedia.route) {
@@ -127,10 +147,10 @@ private fun MainBottomNavigation(
 ) {
     NavigationBar {
         bottomNavItems.forEach { item ->
-            val selectedRoute = if (currentRoute == Screen.OrtopediaResultado.route) {
-                Screen.Ortopedia.route
-            } else {
-                currentRoute
+            val selectedRoute = when {
+                currentRoute == Screen.OrtopediaResultado.route -> Screen.Ortopedia.route
+                currentRoute?.startsWith("geral") == true -> Screen.Geral.route
+                else -> currentRoute
             }
 
             NavigationBarItem(
