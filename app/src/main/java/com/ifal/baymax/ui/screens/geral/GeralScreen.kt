@@ -1,6 +1,5 @@
 package com.ifal.baymax.ui.screens.geral
 
-import android.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -42,19 +41,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.room.util.TableInfo
 import com.ifal.baymax.db.general.GeralDatabase
 import com.ifal.baymax.db.general.GeralTriagem
 import com.ifal.baymax.ui.navigation.Screen
 import kotlinx.coroutines.launch
-import java.nio.channels.Selector
 import kotlin.math.roundToInt
 
 val GeralVermelho = Color(0xFFEF4444)
 val GeralVermelhoEscuro = Color(0xFFDC2626)
 val GeralVermelhoClaro = Color(0xFFFEE3E3)
 
-private val sintomasComuns = listOf("Febre", "Dor de cabeça", "Enjoo", "Dorde garganta")
+private val sintomasComuns = listOf("Febre", "Dor de cabeça", "Enjoo", "Dor de garganta")
 
 @Composable
 private fun GeralHeader() {
@@ -190,7 +187,7 @@ fun GeralScreen(navController: NavController) {
         OutlinedTextField(
             value = detalhes,
             onValueChange = { detalhes = it },
-            label = { Text("Outros detalhes (opcional") },
+            label = { Text("Outros detalhes (opcional)") },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
@@ -205,7 +202,7 @@ fun GeralScreen(navController: NavController) {
                     GeralDatabase.getInstance(context).triagemDao().inserir(
                         GeralTriagem(
                             nivelDor = nivelDor,
-                            sintomas = sintomas.joinToString { ", " },
+                            sintomas = sintomas.joinToString(", "),
                             detalhes = detalhes
                         )
                     )
