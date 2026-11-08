@@ -12,14 +12,17 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.ifal.baymax.ui.screens.orthopedics.OrtopediaResultScreen
 import com.ifal.baymax.ui.screens.orthopedics.OrtopediaScreen
 import com.ifal.baymax.db.orthopedics.OrtopediaViewModel
 import com.ifal.baymax.ui.screens.cardiology.CardiologiaScreen
+import com.ifal.baymax.ui.screens.geral.GeralScreen
 import com.ifal.baymax.ui.screens.orthopedics.OrtopediaApiScreen
 
 data class BottomNavItem(
@@ -55,11 +58,11 @@ fun AppNavigation() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Screen.Ortopedia.route,
+            startDestination = Screen.Geral.route,
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Geral.route) {
-                Text("Geral")
+                GeralScreen(navController = navController)
             }
 
             composable(Screen.Ortopedia.route) {

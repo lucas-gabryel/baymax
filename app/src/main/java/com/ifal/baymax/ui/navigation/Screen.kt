@@ -2,6 +2,10 @@ package com.ifal.baymax.ui.navigation
 
 sealed class Screen(val route: String) {
     data object Geral : Screen("geral")
+    data object GeralHistorico: Screen("geral_historico")
+    data object GeralResultado: Screen("geral_resultado/{nivelDor}") {
+        fun criarRota(nivelDor: Int) = "geral_resultado/$nivelDor"
+    }
     data object Ortopedia : Screen("ortopedia")
     data object Cardiologia : Screen("cardio")
     data object CardiologiaResultado : Screen("cardio_resultado")
