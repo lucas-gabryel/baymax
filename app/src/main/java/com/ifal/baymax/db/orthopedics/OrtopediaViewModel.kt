@@ -18,9 +18,8 @@ import kotlinx.coroutines.launch
 class OrtopediaViewModel(application: Application) : AndroidViewModel(application) {
 
     private val dao = OrtopediaDatabase.getDatabase(application).ortopediaDao()
-    private val repository = OrtopediaRepository(dao)
     private val apiService = OrtopediaApiService.create()
-    val triageHistory: StateFlow<List<OrtopediaTriage>> = repository.allTriages.stateIn(
+    val triageHistory: StateFlow<List<OrtopediaTriage>> = dao.getAllTriages().stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = emptyList()
@@ -51,10 +50,9 @@ class OrtopediaViewModel(application: Application) : AndroidViewModel(applicatio
         uiState = OrtopediaUiState()
     }
     fun analyze() {
-        uiState = uiState.copy(resultVisible = true)
         val affectedBone = uiState.selectedSymptoms.ifEmpty { setOf("Nenhum sintoma selecionado") }.joinToString()
         viewModelScope.launch {
-            repository.insert(
+            dao.insert(
                 OrtopediaTriage(
                     painLevel = uiState.painLevel,
                     affectedBone = affectedBone,
@@ -63,7 +61,12 @@ class OrtopediaViewModel(application: Application) : AndroidViewModel(applicatio
             )
         }
     }
-    fun fetchNearbyHospitals(lat: Double = -9.6658, lng: Double = -35.7350) {
+    fun setLocationError(message: String) {
+        isLoadingApi = false
+        hospitals = emptyList()
+        apiError = message
+    }
+    fun fetchNearbyHospitals(lat: Double, lng: Double) {
         viewModelScope.launch {
             isLoadingApi = true
             apiError = null

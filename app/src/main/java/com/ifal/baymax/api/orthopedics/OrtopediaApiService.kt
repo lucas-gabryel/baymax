@@ -1,13 +1,21 @@
 package com.ifal.baymax.api.orthopedics
 
-import okhttp3.Dns
-import okhttp3.OkHttpClient
-import retrofit2.http.Query
+import com.google.gson.annotations.SerializedName
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Headers
-import java.net.Inet4Address
+import retrofit2.http.Query
+
+data class HospitalElement(
+    @SerializedName("place_id")
+    val id: Long,
+    val name: String?,
+    @SerializedName("display_name")
+    val displayName: String?,
+    val lat: Double,
+    val lon: Double
+)
 
 interface OrtopediaApiService {
 
@@ -19,17 +27,11 @@ interface OrtopediaApiService {
     suspend fun getNearbyHospitals(
         @Query("viewbox") viewbox: String
     ): List<HospitalElement>
+
     companion object {
         fun create(): OrtopediaApiService {
-            val client = OkHttpClient.Builder()
-                .dns { host ->
-                    Dns.SYSTEM.lookup(host).filterIsInstance<Inet4Address>()
-                        .ifEmpty { Dns.SYSTEM.lookup(host) }
-                }
-                .build()
             return Retrofit.Builder()
                 .baseUrl("https://nominatim.openstreetmap.org/")
-                .client(client)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
                 .create(OrtopediaApiService::class.java)
