@@ -24,6 +24,10 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,6 +35,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import com.ifal.baymax.api.orthopedics.HospitalElement
 
 @SuppressLint("MissingPermission")
@@ -40,23 +45,36 @@ fun OrtopediaApiScreen(
     isLoading: Boolean,
     errorMessage: String?,
     onLoadHospitals: (Double, Double) -> Unit,
+    onLocationError: (String) -> Unit = {},
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
+    var isFetchingLocation by remember { mutableStateOf(true) }
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         if (permissions.values.any { it }) {
-            LocationServices.getFusedLocationProviderClient(context).lastLocation
+            val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+            fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
                 .addOnSuccessListener { loc ->
-                    onLoadHospitals(loc?.latitude ?: -9.6658, loc?.longitude ?: -35.7350)
+                    isFetchingLocation = false
+                    if (loc != null) {
+                        onLoadHospitals(loc.latitude, loc.longitude)
+                    } else {
+                        onLocationError("Não foi possível obter a localização do aparelho. Verifique se o GPS está ativado.")
+                    }
                 }
-                .addOnFailureListener { onLoadHospitals(-9.6658, -35.7350) }
+                .addOnFailureListener {
+                    isFetchingLocation = false
+                    onLocationError("Falha ao obter a localização do aparelho.")
+                }
         } else {
-            onLoadHospitals(-9.6658, -35.7350)
+            isFetchingLocation = false
+            onLocationError("Permissão de localização negada. Ative o GPS para buscar hospitais próximos.")
         }
     }
     LaunchedEffect(Unit) {
+        isFetchingLocation = true
         permissionLauncher.launch(
             arrayOf(
                 Manifest.permission.ACCESS_FINE_LOCATION,
@@ -77,7 +95,7 @@ fun OrtopediaApiScreen(
         )
         Text("Toque em um hospital para abrir a rota no Google Maps")
         when {
-            isLoading -> {
+            isFetchingLocation || isLoading -> {
                 Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }

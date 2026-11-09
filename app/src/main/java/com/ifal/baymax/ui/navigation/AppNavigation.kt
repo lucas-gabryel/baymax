@@ -133,6 +133,7 @@ fun AppNavigation() {
                     isLoading = ortopediaViewModel.isLoadingApi,
                     errorMessage = ortopediaViewModel.apiError,
                     onLoadHospitals = ortopediaViewModel::fetchNearbyHospitals,
+                    onLocationError = ortopediaViewModel::setLocationError,
                     onBack = { navController.popBackStack() }
                 )
             }
