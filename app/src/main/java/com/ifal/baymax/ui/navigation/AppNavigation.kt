@@ -123,11 +123,11 @@ fun AppNavigation() {
                         navController.popBackStack()
                     },
                     onViewRoute = {
-                        navController.navigate(Screen.OrtopediaEspecialistas.route)
+                        navController.navigate(Screen.OrtopediaHospitais.route)
                     }
                 )
             }
-            composable(Screen.OrtopediaEspecialistas.route) {
+            composable(Screen.OrtopediaHospitais.route) {
                 OrtopediaApiScreen(
                     hospitals = ortopediaViewModel.hospitals,
                     isLoading = ortopediaViewModel.isLoadingApi,

@@ -126,7 +126,7 @@ fun OrtopediaApiScreen(
                                 Text("📍 $address")
                                 Button(
                                     onClick = {
-                                        val uri = Uri.parse("https://www.google.com/maps/dir/?api=1&destination=${hospital.lat},${hospital.lon}")
+                                        val uri = Uri.parse("https://www.google.com/maps/dir/?api=1&destination=${Uri.encode(address)}")
                                         context.startActivity(Intent(Intent.ACTION_VIEW, uri))
                                     },
                                     modifier = Modifier.fillMaxWidth(),
