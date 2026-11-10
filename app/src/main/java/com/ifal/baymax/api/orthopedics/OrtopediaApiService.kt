@@ -12,9 +12,7 @@ data class HospitalElement(
     val id: Long,
     val name: String?,
     @SerializedName("display_name")
-    val displayName: String?,
-    val lat: Double,
-    val lon: Double
+    val displayName: String?
 )
 
 interface OrtopediaApiService {

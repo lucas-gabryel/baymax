@@ -1,7 +1,6 @@
 package com.ifal.baymax.db.orthopedics
 
 import android.app.Application
-import android.location.Location
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -72,11 +71,7 @@ class OrtopediaViewModel(application: Application) : AndroidViewModel(applicatio
             apiError = null
             try {
                 val viewbox = "${lng - 0.1},${lat + 0.1},${lng + 0.1},${lat - 0.1}"
-                hospitals = apiService.getNearbyHospitals(viewbox).sortedBy { hospital ->
-                    val dist = FloatArray(1)
-                    Location.distanceBetween(lat, lng, hospital.lat, hospital.lon, dist)
-                    dist[0]
-                }
+                hospitals = apiService.getNearbyHospitals(viewbox)
             } catch (e: Exception) {
                 apiError = "Erro ao buscar hospitais: ${e.message}"
             } finally {

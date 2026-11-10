@@ -11,5 +11,5 @@ sealed class Screen(val route: String) {
     data object CardiologiaResultado : Screen("cardio_resultado")
     data object Psicologia : Screen("mental")
     data object OrtopediaResultado : Screen("ortopedia_resultado")
-    data object OrtopediaEspecialistas : Screen("ortopedia_especialistas")
+    data object OrtopediaHospitais : Screen("ortopedia_hospitais")
 }
