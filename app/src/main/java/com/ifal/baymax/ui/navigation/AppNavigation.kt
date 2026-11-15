@@ -151,6 +151,7 @@ private fun MainBottomNavigation(
             val selectedRoute = when {
                 currentRoute == Screen.OrtopediaResultado.route -> Screen.Ortopedia.route
                 currentRoute?.startsWith("geral") == true -> Screen.Geral.route
+                currentRoute == Screen.CardiologiaResultado.route -> Screen.Cardiologia.route
                 else -> currentRoute
             }
 
